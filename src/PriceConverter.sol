@@ -21,7 +21,6 @@ library PriceConverter {
 
     // Get the version of the Chainlink Price Feed
     function getVersion(AggregatorV3Interface priceFeed) public view returns (uint256) {
-        // Use a specific address for Chainlink Price Feed to get the version
         return priceFeed.version();
     }
 }
