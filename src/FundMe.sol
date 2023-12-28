@@ -33,29 +33,8 @@ contract FundMe {
         );
 
         // Record the funder's address and the funded amount
-        s_funders.push(msg.sender);
         s_addressToAmountFunded[msg.sender] += msg.value;
-    }
-
-    function cheaperWithdraw() public onlyOwner {
-        uint256 fundersLength = s_funders.length;
-
-        for (
-            uint256 funderIndex = 0;
-            funderIndex < fundersLength;
-            funderIndex++
-        ) {
-            address funder = s_funders[funderIndex];
-            s_addressToAmountFunded[funder]= 0;
-        }
-
-        s_funders = new address[](0);
-
-        // Transfer the contract balance to the owner
-        (bool callSuccess, ) = payable(msg.sender).call{
-            value: address(this).balance
-        }("");
-        require(callSuccess, "call failed");
+        s_funders.push(msg.sender);
     }
 
     // Function for the owner to withdraw funds
@@ -74,10 +53,29 @@ contract FundMe {
         s_funders = new address[](0);
 
         // Transfer the contract balance to the owner
+        (bool success, ) = i_owner.call{value: address(this).balance}("");
+        require(success);
+    }
+
+    function cheaperWithdraw() public onlyOwner {
+        uint256 fundersLength = s_funders.length;
+
+        for (
+            uint256 funderIndex = 0;
+            funderIndex < fundersLength;
+            funderIndex++
+        ) {
+            address funder = s_funders[funderIndex];
+            s_addressToAmountFunded[funder] = 0;
+        }
+
+        s_funders = new address[](0);
+
+        // Transfer the contract balance to the owner
         (bool callSuccess, ) = payable(msg.sender).call{
             value: address(this).balance
         }("");
-        require(callSuccess, "Withdrawal failed");
+        require(callSuccess, "call failed");
     }
 
     // Function to log the latest price from the Chainlink Price Feed
